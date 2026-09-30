@@ -1,0 +1,1742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carry Booking</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' fill='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%2322d3ee'/%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='translate(10, 10)'%3E%3Cpath d='M20,5 L35,25 L20,45 L5,25 Z' fill='url(%23g)'/%3E%3Ccircle cx='20' cy='25' r='5' fill='white' opacity='0.9'/%3E%3Cpath d='M20,45 L15,55 L20,50 L25,55 Z' fill='%23fbbf24'/%3E%3C/g%3E%3Ctext x='55' y='28' font-family='Arial, sans-serif' font-size='16' font-weight='bold' fill='white'%3ECARRY%3C/text%3E%3Ctext x='55' y='45' font-family='Arial, sans-serif' font-size='16' font-weight='bold' fill='url(%23g)'%3EBOOKING%3C/text%3E%3C/svg%3E">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #22d3ee;
+            --accent: #f472b6;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #ef4444;
+            --dark: #0a0a2e;
+            --darker: #050520;
+            --card-bg: rgba(255, 255, 255, 0.04);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --gradient-1: linear-gradient(135deg, #6366f1, #8b5cf6);
+            --gradient-2: linear-gradient(135deg, #22d3ee, #06b6d4);
+            --gradient-3: linear-gradient(135deg, #f472b6, #ec4899);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--darker);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.12) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(34, 211, 238, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(244, 114, 182, 0.04) 0%, transparent 50%),
+                var(--darker);
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* Navigation */
+        .navbar {
+            background: rgba(10, 10, 46, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 0.8rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            cursor: pointer;
+        }
+
+        .nav-brand img {
+            height: 38px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .nav-links a:hover {
+            color: var(--secondary);
+            background: rgba(34, 211, 238, 0.08);
+        }
+
+        .nav-links a.active {
+            color: var(--secondary);
+            background: rgba(34, 211, 238, 0.12);
+        }
+
+        /* Page sections */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 0;
+            position: relative;
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .hero-bg img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.4;
+        }
+
+        .hero-bg::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, 
+                rgba(5, 5, 32, 0.7) 0%, 
+                rgba(5, 5, 32, 0.85) 50%,
+                rgba(5, 5, 32, 0.95) 100%);
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .hero-text {
+            text-align: left;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        .hero h1 {
+            font-size: 3.8rem;
+            font-weight: 900;
+            margin-bottom: 1.25rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -2px;
+        }
+
+        .hero p {
+            font-size: 1.15rem;
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+            max-width: 500px;
+            font-weight: 300;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .hero-image {
+            position: relative;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            z-index: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.35);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.45);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1.5px solid rgba(99, 102, 241, 0.5);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: white;
+            box-shadow: 0 10px 30px rgba(52, 211, 153, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(52, 211, 153, 0.4);
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .card h3 {
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            color: white;
+            font-weight: 700;
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Grid Layout */
+        .grid {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .grid-3 {
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        }
+
+        /* Forms */
+        .form-container {
+            max-width: 640px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: 600;
+            color: var(--text);
+            font-size: 0.85rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        select.form-control option {
+            background: var(--dark);
+            color: var(--text);
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            padding: 3rem 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: var(--gradient-2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 16px;
+            border: 1px solid var(--card-border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        th {
+            background: rgba(99, 102, 241, 0.08);
+            color: var(--primary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+        }
+
+        td {
+            border-top: 1px solid var(--card-border);
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--success);
+        }
+
+        .badge-warning {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--warning);
+        }
+
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--danger);
+        }
+
+        .badge-info {
+            background: rgba(34, 211, 238, 0.15);
+            color: var(--secondary);
+        }
+
+        /* Confirmation Page */
+        .confirmation-box {
+            text-align: center;
+            padding: 3rem;
+        }
+
+        .confirmation-icon {
+            width: 90px;
+            height: 90px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.35);
+        }
+
+        .booking-ref {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--secondary);
+            background: rgba(34, 211, 238, 0.08);
+            padding: 0.75rem 1.5rem;
+            border-radius: 10px;
+            display: inline-block;
+            margin: 1rem 0;
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            letter-spacing: 1px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .detail-item {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.25rem;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            border-top: 1px solid var(--card-border);
+            margin-top: 4rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Section Title */
+        .section-title {
+            text-align: center;
+            padding: 3rem 2rem 1rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                padding: 3rem 1.5rem;
+                gap: 2rem;
+            }
+
+            .hero-text {
+                text-align: center;
+            }
+
+            .hero p {
+                max-width: 100%;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .nav-links {
+                gap: 0.25rem;
+            }
+
+            .nav-links a {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 2rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+
+        /* Driver Card */
+        .driver-card {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .driver-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .driver-info h4 {
+            color: white;
+            margin-bottom: 0.2rem;
+            font-size: 1rem;
+        }
+
+        .driver-info p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .driver-rating {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        /* Feature List */
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .feature-list li {
+            padding: 0.6rem 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .feature-list li::before {
+            content: "✓";
+            color: var(--success);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        /* Payment Page */
+        .payment-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .payment-card {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .payment-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-4px);
+        }
+        .payment-card.selected {
+            border-color: var(--success);
+            background: rgba(52, 211, 153, 0.08);
+        }
+        .payment-card .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .payment-card h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+        .payment-instructions {
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+        }
+        .payment-instructions h4 {
+            color: var(--warning);
+            margin-bottom: 1rem;
+        }
+        .payment-instructions ol {
+            padding-left: 1.5rem;
+            color: var(--text);
+        }
+        .payment-instructions li {
+            margin-bottom: 0.4rem;
+            font-size: 0.9rem;
+        }
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+        .success-overlay.show {
+            display: flex;
+        }
+        .success-overlay .checkmark {
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+            margin-bottom: 2rem;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+
+        /* Trust badges */
+        .trust-badges {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            padding: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .trust-item span {
+            font-size: 1.3rem;
+        }
+
+        /* Quick booking CTA */
+        .quick-cta {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+            border: 1px solid rgba(99, 102, 241, 0.15);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            text-align: center;
+            max-width: 800px;
+            margin: 3rem auto;
+        }
+
+        .quick-cta h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .quick-cta p {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Service cards with images */
+        .service-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            padding: 1.5rem;
+        }
+
+        .service-card img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .service-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, transparent 0%, rgba(5, 5, 32, 0.9) 100%);
+        }
+
+        .service-card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card h4 {
+            color: white;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .service-card p {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="stars"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <a class="nav-brand" onclick="showPage('home')">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 60' fill='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='0%25'%3E%3Cstop offset='0%25' style='stop-color:%2322d3ee'/%3E%3Cstop offset='100%25' style='stop-color:%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg transform='translate(10, 10)'%3E%3Cpath d='M20,5 L35,25 L20,45 L5,25 Z' fill='url(%23g)'/%3E%3Ccircle cx='20' cy='25' r='5' fill='white' opacity='0.9'/%3E%3Cpath d='M20,45 L15,55 L20,50 L25,55 Z' fill='%23fbbf24'/%3E%3C/g%3E%3Ctext x='55' y='28' font-family='Arial, sans-serif' font-size='16' font-weight='bold' fill='white'%3ECARRY%3C/text%3E%3Ctext x='55' y='45' font-family='Arial, sans-serif' font-size='16' font-weight='bold' fill='url(%23g)'%3EBOOKING%3C/text%3E%3C/svg%3E" alt="Carry Booking">
+            </a>
+            <ul class="nav-links">
+                <li><a onclick="showPage('home')" class="active" data-page="home">Home</a></li>
+                <li><a onclick="showPage('book')" data-page="book">Book Carry</a></li>
+                <li><a onclick="showPage('payment')" data-page="payment">Payment</a></li>
+                <li><a onclick="showPage('driver')" data-page="driver">Driver Registration</a></li>
+                <li><a onclick="showPage('bookings')" data-page="bookings">All Bookings</a></li>
+                <li><a onclick="showPage('drivers')" data-page="drivers">Our Drivers</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- HOME PAGE -->
+    <div id="page-home" class="page active">
+        <section class="hero">
+            <div class="hero-bg">
+                <img src="https://www.pngitem.com/pimgs/m/4-47200_suzuki-bolan-png-transparent-png.png" alt="Suzuki Bolan">
+            </div>
+            <div class="hero-content">
+                <div class="hero-text">
+                    <div class="hero-badge">Trusted by 500+ Customers</div>
+                    <h1>Deliver Beyond<br>Gravity</h1>
+                    <p>Book your carry package in seconds. Fast, secure, and professional delivery service across the city with real-time tracking.</p>
+                    <div class="hero-buttons">
+                        <a class="btn btn-primary" onclick="showPage('book')">Book Now →</a>
+                        <a class="btn btn-outline" onclick="showPage('driver')">Register as Driver</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="https://www.pngitem.com/pimgs/m/4-47200_suzuki-bolan-png-transparent-png.png" alt="Suzuki Bolan">
+                </div>
+            </div>
+        </section>
+
+        <!-- Trust Badges -->
+        <div class="trust-badges">
+            <div class="trust-item"><span>🚀</span> Same Day Delivery</div>
+            <div class="trust-item"><span>🛡️</span> Fully Insured</div>
+            <div class="trust-item"><span>📍</span> Live Tracking</div>
+            <div class="trust-item"><span>⭐</span> 5.0 Rated</div>
+        </div>
+
+        <!-- Stats -->
+        <section class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="stat-bookings">0</div>
+                <div class="stat-label">Total Bookings</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="stat-drivers">0</div>
+                <div class="stat-label">Active Drivers</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Service Available</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Safe Delivery</div>
+            </div>
+        </section>
+
+        <!-- Services with Real Images -->
+        <div class="section-title">
+            <h2>Our Services</h2>
+            <p>Professional delivery solutions for every need</p>
+        </div>
+
+        <div class="grid grid-3">
+            <div class="service-card">
+                <img src="https://www.pngitem.com/pimgs/m/4-47200_suzuki-bolan-png-transparent-png.png" alt="Suzuki Bolan">
+                <div class="service-card-content">
+                    <h4>Document Delivery</h4>
+                    <p>Fast & secure document transport</p>
+                </div>
+            </div>
+            <div class="service-card">
+                <img src="https://www.pngitem.com/pimgs/m/4-47200_suzuki-bolan-png-transparent-png.png" alt="Suzuki Bolan">
+                <div class="service-card-content">
+                    <h4>Package Delivery</h4>
+                    <p>All sizes, handled with care</p>
+                </div>
+            </div>
+            <div class="service-card">
+                <img src="https://www.pngitem.com/pimgs/m/4-47200_suzuki-bolan-png-transparent-png.png" alt="Suzuki Bolan">
+                <div class="service-card-content">
+                    <h4>Heavy Cargo</h4>
+                    <p>Large items, professional handling</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why Choose Us -->
+        <div class="section-title">
+            <h2>Why Choose Us?</h2>
+            <p>Experience the future of package delivery</p>
+        </div>
+
+        <div class="grid grid-3">
+            <div class="card">
+                <div class="card-icon" style="background: rgba(99, 102, 241, 0.15);">🚀</div>
+                <h3>Lightning Fast</h3>
+                <p>Same-day delivery with real-time tracking. Your packages reach destination in record time.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: rgba(34, 211, 238, 0.15);">🛡️</div>
+                <h3>100% Secure</h3>
+                <p>Fully insured packages handled with utmost care. End-to-end secure delivery guaranteed.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: rgba(244, 114, 182, 0.15);">💰</div>
+                <h3>Best Prices</h3>
+                <p>Competitive rates with no hidden charges. Best value for your money on every booking.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: rgba(52, 211, 153, 0.15);">📍</div>
+                <h3>Live Tracking</h3>
+                <p>Track your package in real-time from pickup to delivery. Stay updated at every step.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: rgba(251, 191, 36, 0.15);">⭐</div>
+                <h3>Verified Drivers</h3>
+                <p>All drivers are background-checked and professionally trained for safe package handling.</p>
+            </div>
+            <div class="card">
+                <div class="card-icon" style="background: rgba(139, 92, 246, 0.15);">📱</div>
+                <h3>Easy Booking</h3>
+                <p>Book in seconds from your home. Simple, fast, and hassle-free on any device.</p>
+            </div>
+        </div>
+
+        <!-- How It Works -->
+        <div class="section-title">
+            <h2>How It Works</h2>
+            <p>Simple 3-step process</p>
+        </div>
+
+        <div class="grid grid-3">
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">1️⃣</div>
+                <h3>Book Online</h3>
+                <p>Fill in your pickup and drop-off details. Choose your package type and schedule.</p>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">2️⃣</div>
+                <h3>Driver Assigned</h3>
+                <p>We assign the nearest verified driver to pick up your package from your location.</p>
+            </div>
+            <div class="card" style="text-align: center;">
+                <div style="font-size: 2.5rem; margin-bottom: 1rem;">3️⃣</div>
+                <h3>Delivered Safe</h3>
+                <p>Your package is delivered safely to the destination. Track it live until delivery.</p>
+            </div>
+        </div>
+
+        <!-- Quick CTA -->
+        <div class="quick-cta">
+            <h3>Ready to Deliver?</h3>
+            <p>Book your package now and experience lightning-fast delivery</p>
+            <a class="btn btn-primary" style="font-size: 1.1rem; padding: 16px 40px;" onclick="showPage('book')">
+                Start Booking Now →
+            </a>
+        </div>
+    </div>
+
+    <!-- BOOK PAGE -->
+    <div id="page-book" class="page">
+        <div class="section-title">
+            <h2>Book Your Carry</h2>
+            <p>Quick and easy booking in seconds</p>
+        </div>
+
+        <div class="card form-container">
+            <form id="bookingForm">
+                <div class="grid grid-2" style="padding: 0; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="full_name">Full Name *</label>
+                        <input type="text" class="form-control" id="full_name" name="full_name" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" placeholder="0300-1234567" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="padding: 0; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="pickup_location">Pickup Location *</label>
+                        <input type="text" class="form-control" id="pickup_location" name="pickup_location" placeholder="Pickup address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dropoff_location">Drop-off Location *</label>
+                        <input type="text" class="form-control" id="dropoff_location" name="dropoff_location" placeholder="Drop-off address" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="padding: 0; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="package_type">Package Type *</label>
+                        <select class="form-control" id="package_type" name="package_type" required>
+                            <option value="">Select type</option>
+                            <option value="Documents">Documents</option>
+                            <option value="Small Package">Small Package</option>
+                            <option value="Medium Package">Medium Package</option>
+                            <option value="Large Package">Large Package</option>
+                            <option value="Heavy Cargo">Heavy Cargo</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="travel_date">Travel Date *</label>
+                        <input type="date" class="form-control" id="travel_date" name="travel_date" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; font-size: 1rem; padding: 16px;">
+                    Confirm Booking →
+                </button>
+            </form>
+        </div>
+
+        <div style="max-width: 640px; margin: 2rem auto; padding: 0 2rem;">
+            <div class="card" style="display: flex; align-items: center; gap: 1.25rem;">
+                <img src="https://www.pngitem.com/pimgs/m/4-47200_suzuki-bolan-png-transparent-png.png" alt="Suzuki Bolan" style="width: 100px; height: 100px; object-fit: cover; border-radius: 12px;">
+                <div>
+                    <h3 style="color: white; margin-bottom: 0.25rem;">Need Help?</h3>
+                    <p style="color: var(--text-muted); font-size: 0.85rem;">Our support team is available 24/7.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOKINGS PAGE -->
+    <div id="page-bookings" class="page">
+        <div class="section-title">
+            <h2>All Bookings</h2>
+            <p>View and manage all carry bookings</p>
+        </div>
+
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 2rem;">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ref #</th>
+                            <th>Passenger</th>
+                            <th>Phone</th>
+                            <th>Route</th>
+                            <th>Package</th>
+                            <th>Date</th>
+                            <th>Fare</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookingsTable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONFIRMATION PAGE -->
+    <div id="page-confirmation" class="page">
+        <div class="card form-container confirmation-box" id="confirmationContent">
+            <div class="confirmation-icon">✓</div>
+            <h1 style="color: white; margin-bottom: 1rem;">Booking Confirmed!</h1>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">Your carry package has been booked successfully.</p>
+            <div class="booking-ref" id="bookingRef">Loading...</div>
+            <div class="details-grid" style="text-align: left;" id="bookingDetails"></div>
+            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                <a class="btn btn-primary" onclick="showPage('book')">Book Another</a>
+                <a class="btn btn-outline" onclick="showPage('home')">Go Home</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- DRIVER PAGE -->
+    <div id="page-driver" class="page">
+        <div class="section-title">
+            <h2>Driver Registration</h2>
+            <p>Join our team of professional delivery drivers</p>
+        </div>
+
+        <div class="card form-container">
+            <form id="driverForm">
+                <div class="grid grid-2" style="padding: 0; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="driver_full_name">Full Name *</label>
+                        <input type="text" class="form-control" id="driver_full_name" name="full_name" placeholder="Your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="driver_phone">Phone Number *</label>
+                        <input type="tel" class="form-control" id="driver_phone" name="phone" placeholder="0300-1234567" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="padding: 0; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="vehicle_type">Vehicle Type *</label>
+                        <select class="form-control" id="vehicle_type" name="vehicle_type" required>
+                            <option value="">Select type</option>
+                            <option value="Bike">Bike</option>
+                            <option value="Car">Car</option>
+                            <option value="Van">Van</option>
+                            <option value="Truck">Truck</option>
+                            <option value="Pickup">Pickup</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="vehicle_number">Vehicle Number *</label>
+                        <input type="text" class="form-control" id="vehicle_number" name="vehicle_number" placeholder="ABC-1234" required>
+                    </div>
+                </div>
+
+                <div class="grid grid-2" style="padding: 0; gap: 1rem;">
+                    <div class="form-group">
+                        <label for="city">City *</label>
+                        <input type="text" class="form-control" id="city" name="city" placeholder="Your city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience_years">Experience (Years)</label>
+                        <input type="number" class="form-control" id="experience_years" name="experience_years" value="0" min="0" max="50">
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center; font-size: 1rem; padding: 16px;">
+                    Register as Driver
+                </button>
+            </form>
+        </div>
+
+        <div style="max-width: 640px; margin: 2rem auto; padding: 0 2rem;">
+            <div class="card">
+                <h3 style="color: white; margin-bottom: 1rem;">Benefits of Joining Us</h3>
+                <ul class="feature-list">
+                    <li>Competitive earnings per delivery</li>
+                    <li>Flexible working hours</li>
+                    <li>Weekly payments</li>
+                    <li>Insurance coverage</li>
+                    <li>24/7 support</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- DRIVERS PAGE -->
+    <div id="page-drivers" class="page">
+        <div class="section-title">
+            <h2>Our Drivers</h2>
+            <p>Meet our professional delivery team</p>
+        </div>
+
+        <div class="grid grid-2" style="max-width: 1000px;" id="driversGrid">
+        </div>
+    </div>
+
+    <!-- PAYMENT PAGE -->
+    <div id="page-payment" class="page">
+        <div class="section-title">
+            <h2>Payment</h2>
+            <p>Pay easily via JazzCash or Easypaisa to confirm your booking</p>
+        </div>
+
+        <div class="card form-container">
+            <h3 style="color: white; margin-bottom: 1.5rem; text-align: center;">Select Payment Method</h3>
+
+            <div class="payment-methods">
+                <div class="payment-card selected" onclick="selectPayment('jazzcash', event)">
+                    <div class="icon">📱</div>
+                    <h3>JazzCash</h3>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label style="color: var(--text-muted); font-size: 0.8rem;">Account Number</label>
+                        <input type="text" class="form-control" id="jazzcash_number" placeholder="Enter JazzCash number" style="text-align: center; font-size: 1rem; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: var(--text-muted); font-size: 0.8rem;">Account Name</label>
+                        <input type="text" class="form-control" id="jazzcash_name" placeholder="Enter account name" style="text-align: center;">
+                    </div>
+                </div>
+
+                <div class="payment-card" onclick="selectPayment('easypaisa', event)">
+                    <div class="icon">💳</div>
+                    <h3>Easypaisa</h3>
+                    <div class="form-group" style="margin-top: 1rem;">
+                        <label style="color: var(--text-muted); font-size: 0.8rem;">Account Number</label>
+                        <input type="text" class="form-control" id="easypaisa_number" placeholder="Enter Easypaisa number" style="text-align: center; font-size: 1rem; font-weight: 600;">
+                    </div>
+                    <div class="form-group">
+                        <label style="color: var(--text-muted); font-size: 0.8rem;">Account Name</label>
+                        <input type="text" class="form-control" id="easypaisa_name" placeholder="Enter account name" style="text-align: center;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-instructions">
+                <h4>📋 Payment Instructions:</h4>
+                <ol>
+                    <li>Open your JazzCash/Easypaisa app</li>
+                    <li>Send money to the account number above</li>
+                    <li>Enter the amount: <strong id="paymentAmount">Rs. 1,000</strong></li>
+                    <li>Take a screenshot of the payment</li>
+                    <li>Click "I Have Paid" button below</li>
+                    <li>Your booking will be confirmed after verification</li>
+                </ol>
+            </div>
+
+            <div class="form-group">
+                <label for="sender_number">Your Payment Account Number *</label>
+                <input type="text" class="form-control" id="sender_number" placeholder="Enter the number you paid from" required>
+            </div>
+
+            <div class="form-group">
+                <label for="transaction_id">Transaction ID *</label>
+                <input type="text" class="form-control" id="transaction_id" placeholder="Enter transaction ID from payment" required>
+            </div>
+
+            <div class="form-group">
+                <label for="payment_amount">Amount Paid *</label>
+                <input type="text" class="form-control" id="payment_amount" placeholder="e.g., 1000" required>
+            </div>
+
+            <button class="btn btn-success" style="width: 100%; justify-content: center; font-size: 1rem; padding: 16px;" onclick="confirmPayment()">
+                I Have Paid - Confirm Payment
+            </button>
+        </div>
+
+        <div class="success-overlay" id="successOverlay">
+            <div class="checkmark">✓</div>
+            <h2 style="color: white; margin-bottom: 1rem;">Payment Submitted!</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Your payment is being verified. You will receive access shortly.</p>
+            <a class="btn btn-primary" onclick="showPage('home')">Go to Home</a>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2024 Carry Booking. All rights reserved.</p>
+        <p style="margin-top: 0.5rem; font-size: 0.8rem;">Deliver Beyond Gravity</p>
+    </footer>
+
+    <script>
+        // --- Page Navigation ---
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            const targetPage = document.getElementById('page-' + pageName);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            }
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.dataset.page === pageName) {
+                    link.classList.add('active');
+                }
+            });
+            window.scrollTo(0, 0);
+            if (pageName === 'bookings') renderBookings();
+            if (pageName === 'drivers') renderDrivers();
+            if (pageName === 'confirmation') renderConfirmation();
+            if (pageName === 'payment') initPayment();
+            if (pageName === 'home') updateStats();
+        }
+
+        // --- Create starfield ---
+        function createStars() {
+            const starsContainer = document.querySelector('.stars');
+            if (!starsContainer) return;
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.width = Math.random() * 2 + 1 + 'px';
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // --- Form validation ---
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                const requiredFields = this.querySelectorAll('[required]');
+                let valid = true;
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        valid = false;
+                        field.style.borderColor = '#ef4444';
+                        field.style.boxShadow = '0 0 0 3px rgba(239, 68, 68, 0.15)';
+                    } else {
+                        field.style.borderColor = '';
+                        field.style.boxShadow = '';
+                    }
+                });
+                if (!valid) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields.');
+                }
+            });
+        });
+
+        // --- Animate numbers ---
+        function animateNumbers() {
+            const numbers = document.querySelectorAll('.stat-number');
+            numbers.forEach(num => {
+                const target = parseInt(num.textContent);
+                if (isNaN(target) || target === 0) return;
+                const duration = 2000;
+                const step = target / (duration / 16);
+                let current = 0;
+                const timer = setInterval(() => {
+                    current += step;
+                    if (current >= target) {
+                        num.textContent = target;
+                        clearInterval(timer);
+                    } else {
+                        num.textContent = Math.floor(current);
+                    }
+                }, 16);
+            });
+        }
+
+        // --- Update stats ---
+        function updateStats() {
+            const bookings = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            const drivers = JSON.parse(localStorage.getItem('ag_drivers') || '[]');
+            document.getElementById('stat-bookings').textContent = bookings.length;
+            document.getElementById('stat-drivers').textContent = drivers.length;
+        }
+
+        // --- Booking Form ---
+        document.getElementById('bookingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const bookingRef = 'AGR-' + new Date().toISOString().slice(0,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random() * 9000) + 1000);
+
+            const booking = {
+                ref: bookingRef,
+                full_name: document.getElementById('full_name').value,
+                phone: document.getElementById('phone').value,
+                email: '',
+                pickup_location: document.getElementById('pickup_location').value,
+                dropoff_location: document.getElementById('dropoff_location').value,
+                package_type: document.getElementById('package_type').value,
+                package_weight: '',
+                travel_date: document.getElementById('travel_date').value,
+                travel_time: '',
+                passengers: '1',
+                special_instructions: '',
+                status: 'Pending Payment',
+                fare_estimate: calculateFare(document.getElementById('package_type').value),
+                booking_date: new Date().toISOString()
+            };
+
+            const drivers = JSON.parse(localStorage.getItem('ag_drivers') || '[]');
+            const availableDriver = drivers.find(d => d.available);
+            if (availableDriver) {
+                booking.driver_name = availableDriver.full_name;
+                booking.driver_phone = availableDriver.phone;
+                booking.vehicle_type = availableDriver.vehicle_type;
+                booking.vehicle_model = availableDriver.vehicle_model;
+                booking.vehicle_number = availableDriver.vehicle_number;
+            }
+
+            localStorage.setItem('ag_pending_booking', JSON.stringify(booking));
+            showPage('payment');
+        });
+
+        function calculateFare(type) {
+            const fares = {
+                'Documents': 'Rs. 500',
+                'Small Package': 'Rs. 800',
+                'Medium Package': 'Rs. 1,500',
+                'Large Package': 'Rs. 3,000',
+                'Heavy Cargo': 'Rs. 5,000+'
+            };
+            return fares[type] || 'Rs. 1,000';
+        }
+
+        // --- Render Bookings ---
+        function renderBookings() {
+            const bookings = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            const tbody = document.getElementById('bookingsTable');
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                            No bookings found. <a onclick="showPage('book')" style="color: var(--secondary); cursor: pointer;">Book now</a>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = bookings.map(b => `
+                    <tr>
+                        <td><strong>${b.ref}</strong></td>
+                        <td>${b.full_name}</td>
+                        <td>${b.phone}</td>
+                        <td>${b.pickup_location} → ${b.dropoff_location}</td>
+                        <td>${b.package_type}</td>
+                        <td>${b.travel_date}</td>
+                        <td>${b.fare_estimate}</td>
+                        <td><span class="badge badge-success">${b.status}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // --- Render Confirmation ---
+        function renderConfirmation() {
+            const ref = localStorage.getItem('ag_last_booking');
+            const bookings = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+            const booking = bookings.find(b => b.ref === ref);
+
+            if (booking) {
+                document.getElementById('bookingRef').textContent = booking.ref;
+
+                const detailsHtml = `
+                    <div class="detail-item">
+                        <div class="detail-label">Passenger Name</div>
+                        <div class="detail-value">${booking.full_name}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Phone</div>
+                        <div class="detail-value">${booking.phone}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Pickup Location</div>
+                        <div class="detail-value">${booking.pickup_location}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Drop-off Location</div>
+                        <div class="detail-value">${booking.dropoff_location}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Package Type</div>
+                        <div class="detail-value">${booking.package_type}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Travel Date</div>
+                        <div class="detail-value">${booking.travel_date}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Fare Estimate</div>
+                        <div class="detail-value">${booking.fare_estimate}</div>
+                    </div>
+                    ${booking.driver_name ? `
+                    <div class="detail-item">
+                        <div class="detail-label">Assigned Driver</div>
+                        <div class="detail-value">${booking.driver_name}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Vehicle</div>
+                        <div class="detail-value">${booking.vehicle_type} - ${booking.vehicle_model}</div>
+                    </div>
+                    ` : ''}
+                `;
+                document.getElementById('bookingDetails').innerHTML = detailsHtml;
+            } else {
+                document.getElementById('confirmationContent').innerHTML = `
+                    <div class="confirmation-icon" style="background: linear-gradient(135deg, #ef4444, #dc2626);">✗</div>
+                    <h1 style="color: white; margin-bottom: 1rem;">Booking Not Found</h1>
+                    <p style="color: var(--text-muted);">Please make a new booking.</p>
+                    <a class="btn btn-primary" style="margin-top: 1rem;" onclick="showPage('book')">Book Now</a>
+                `;
+            }
+        }
+
+        // --- Driver Form ---
+        document.getElementById('driverForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const driver = {
+                id: Date.now(),
+                full_name: document.getElementById('driver_full_name').value,
+                phone: document.getElementById('driver_phone').value,
+                email: '',
+                vehicle_type: document.getElementById('vehicle_type').value,
+                vehicle_model: '',
+                vehicle_number: document.getElementById('vehicle_number').value,
+                license_number: '',
+                experience_years: document.getElementById('experience_years').value,
+                city: document.getElementById('city').value,
+                available: true,
+                rating: 5.0,
+                registration_date: new Date().toISOString()
+            };
+
+            const drivers = JSON.parse(localStorage.getItem('ag_drivers') || '[]');
+            drivers.push(driver);
+            localStorage.setItem('ag_drivers', JSON.stringify(drivers));
+
+            alert('Driver registration successful!');
+            showPage('drivers');
+        });
+
+        // --- Render Drivers ---
+        function renderDrivers() {
+            const drivers = JSON.parse(localStorage.getItem('ag_drivers') || '[]');
+            const grid = document.getElementById('driversGrid');
+
+            if (drivers.length === 0) {
+                grid.innerHTML = `
+                    <div class="card" style="grid-column: 1 / -1; text-align: center; padding: 3rem;">
+                        <p style="color: var(--text-muted);">No drivers registered yet.</p>
+                        <a class="btn btn-primary" style="margin-top: 1rem;" onclick="showPage('driver')">Register as Driver</a>
+                    </div>
+                `;
+            } else {
+                grid.innerHTML = drivers.map(d => `
+                    <div class="card driver-card">
+                        <div class="driver-avatar">${d.full_name.charAt(0)}</div>
+                        <div class="driver-info">
+                            <h4>${d.full_name}</h4>
+                            <p>${d.vehicle_type} - ${d.vehicle_number}</p>
+                            <p>City: ${d.city}</p>
+                            <p class="driver-rating">★ ${d.rating} Rating</p>
+                            <p>Experience: ${d.experience_years} years</p>
+                            <p>Phone: ${d.phone}</p>
+                            ${d.available
+                                ? '<span class="badge badge-success">Available</span>'
+                                : '<span class="badge badge-warning">On Delivery</span>'}
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // --- Payment Page ---
+        let selectedMethod = 'jazzcash';
+
+        function selectPayment(method, event) {
+            selectedMethod = method;
+            document.querySelectorAll('.payment-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.currentTarget.classList.add('selected');
+        }
+
+        function confirmPayment() {
+            const senderNumber = document.getElementById('sender_number').value;
+            const transactionId = document.getElementById('transaction_id').value;
+            const amount = document.getElementById('payment_amount').value;
+
+            if (!senderNumber || !transactionId || !amount) {
+                alert('Please fill in all payment details.');
+                return;
+            }
+
+            const payment = {
+                method: selectedMethod,
+                sender_number: senderNumber,
+                transaction_id: transactionId,
+                amount: amount,
+                date: new Date().toISOString(),
+                status: 'Pending Verification'
+            };
+
+            const payments = JSON.parse(localStorage.getItem('ag_payments') || '[]');
+            payments.push(payment);
+            localStorage.setItem('ag_payments', JSON.stringify(payments));
+
+            const pendingBooking = JSON.parse(localStorage.getItem('ag_pending_booking') || 'null');
+            if (pendingBooking) {
+                pendingBooking.status = 'Confirmed';
+                pendingBooking.payment_method = selectedMethod;
+                pendingBooking.transaction_id = transactionId;
+
+                const bookings = JSON.parse(localStorage.getItem('ag_bookings') || '[]');
+                bookings.push(pendingBooking);
+                localStorage.setItem('ag_bookings', JSON.stringify(bookings));
+
+                localStorage.setItem('ag_last_booking', pendingBooking.ref);
+                localStorage.removeItem('ag_pending_booking');
+            }
+
+            document.getElementById('successOverlay').classList.add('show');
+        }
+
+        function initPayment() {
+            const pendingBooking = JSON.parse(localStorage.getItem('ag_pending_booking') || 'null');
+            if (pendingBooking && pendingBooking.fare_estimate) {
+                document.getElementById('paymentAmount').textContent = pendingBooking.fare_estimate;
+            }
+        }
+
+        // --- Initialize ---
+        document.addEventListener('DOMContentLoaded', function () {
+            createStars();
+            animateNumbers();
+            updateStats();
+        });
+    </script>
+</body>
+</html>
